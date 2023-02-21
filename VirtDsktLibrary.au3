@@ -202,13 +202,12 @@ EndFunc
 Func GetDesktopArray(ByRef $oArray)
 	Local $pArray, $iRes
 	$iRes = ($OSBuild >= $windows11) ? $oVirtualDesktopManagerInternal.GetDesktops(0, $pArray) : $oVirtualDesktopManagerInternal.GetDesktops($pArray)
-	ConsoleWrite("pArray=" & $pArray & @CRLF)
 	If @error or not $pArray or $iRes Then 
 		ConsoleWriteError("GetDesktops failed. Error Code " & @error & ", Extended: " & @extended & ", pArray: " & $pArray & @CRLF)
 		if @error Then 
-			Return SetError(@error, @extended)
+			Return SetError(@error, @extended, -1)
 		Else
-			Return SetError(-1)
+			Return SetError(-1,0,-1)
 		EndIf
 	EndIf
 	$oArray = ObjCreateInterface($pArray, $IID_IObjectArray, $tagIObjectArray)
