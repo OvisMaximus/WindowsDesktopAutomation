@@ -172,7 +172,7 @@ If @error Then Exit MsgBox("Cast of Virtual Desktop Manager Internal to Object f
 
 
 ; gives the number of virtual desktops
-Func getNumDesktops() 
+Func GetNumDesktops() 
 	Local $iCount, $iHresult
 	$iHresult = ($OSBuild >= $windows11) ? $oVirtualDesktopManagerInternal.GetCount(0, $iCount) : $oVirtualDesktopManagerInternal.GetCount($iCount)
 	If $iHresult <> 0 Then 
@@ -184,7 +184,7 @@ Func getNumDesktops()
 EndFunc
 
 ; creates a new virtual desktop and returns its handle
-Func createDesktop()
+Func CreateDesktop()
 	Local $pNew
 	($OSBuild >= $windows11) ? $oVirtualDesktopManagerInternal.CreateDesktopW(0, $pNew) : $oVirtualDesktopManagerInternal.CreateDesktopW($pNew)
 	If @error Then Return SetError(@error, @extended, -1)
@@ -193,14 +193,14 @@ EndFunc
 
 
 ; switch to a virtual desktop
-Func switchDesktop(Const $pNew)
+Func SwitchDesktop(Const $pNew)
 	($OSBuild >= $windows11) ? $oVirtualDesktopManagerInternal.SwitchDesktop(0, $pNew) : $oVirtualDesktopManagerInternal.SwitchDesktop($pNew)
 	If @error Then Return SetError(@error, @extended, -1)
 	Return 0
 EndFunc
 
 ; enumerates all desktops
-Func getDesktopArray(ByRef $oArray)
+Func GetDesktopArray(ByRef $oArray)
 	Local $pArray
 	($OSBuild >= $windows11) ? $oVirtualDesktopManagerInternal.GetDesktops(0, $pArray) : $oVirtualDesktopManagerInternal.GetDesktops($pArray)
 	If @error Then 
@@ -216,9 +216,9 @@ Func getDesktopArray(ByRef $oArray)
 EndFunc
 
 ;get the desktop handle at nth position
-Func getDesktopAtPosition($n, ByRef $pDesktop)
+Func GetDesktopAtPosition($n, ByRef $pDesktop)
 	Local $oArray, $iCount
-	getDesktopArray($oArray)
+	GetDesktopArray($oArray)
 	If @error Then
 		ConsoleWriteError("Can't access list of desktops. Error Code is " & @error & @CRLF)
 		Return SetError(@error,  @extended, -1)
@@ -234,21 +234,21 @@ Func getDesktopAtPosition($n, ByRef $pDesktop)
 EndFunc
 
 ; gives the current desktop id
-Func getCurrentDesktopHandle(ByRef $pCurrent)
+Func GetCurrentDesktopHandle(ByRef $pCurrent)
 	$iHresult = ($OSBuild >= $windows11) ? $oVirtualDesktopManagerInternal.GetCurrentDesktop(0, $pCurrent) : $oVirtualDesktopManagerInternal.GetCurrentDesktop($pCurrent)
 	If @error Then Return SetError(@error, @extended, -1)
 	Return 0
 EndFunc
 
 ; returns the adjacent desktop id
-Func getAdjacentDesktopHandle($pOriginDesktop, $direction, ByRef $pDesktop)
+Func GetAdjacentDesktopHandle($pOriginDesktop, $direction, ByRef $pDesktop)
 	$oVirtualDesktopManagerInternal.GetAdjacentDesktop($pOriginDesktop, $direction, $pDesktop)
 	If @error Then Return SetError(@error, @extended, -1)
 	Return 0
 EndFunc
 
 ; switches to a specific desktop
-Func switchToDesktop($pDesktop)
+Func SwitchToDesktop($pDesktop)
 	($OSBuild >= $windows11) ? $oVirtualDesktopManagerInternal.SwitchDesktop(0, $pDesktop) : $oVirtualDesktopManagerInternal.SwitchDesktop($pDesktop)
 	If @error Then Return SetError(@error, @extended, -1)
 	Return 0
@@ -279,13 +279,13 @@ Func MoveWindowToDesktop($hWnd, $iDesktop)
 	Local $iHresult, $pView, $pDesktop
 	$iHresult = GetViewHandleForWinHandle($hWnd, $pView)
 	If @error Then Return SetError(@error, @extended, -1)
-	$iHresult = getDesktopAtPosition($iDesktop, $pDesktop)
+	$iHresult = GetDesktopAtPosition($iDesktop, $pDesktop)
 	If @error Then Return SetError(@error, @extended, -2)
 	$iHresult = MoveViewToDesktop($pView, $pDesktop)
 	If @error Then Return SetError(@error, @extended, -3)
 	Return 0
 EndFunc
-
+  
 Func MoveWindow($sQueryText, $sContentText, $iDesktop, $iXpos, $iYpos, $iWidth, $iHeight)
 	Local $hWnd, $iHresult
 	$hWnd = WinGetHandle($sQueryText, $sContentText)
