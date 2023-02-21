@@ -176,8 +176,7 @@ Func GetNumDesktops()
 	Local $iCount, $iHresult
 	$iHresult = ($OSBuild >= $windows11) ? $oVirtualDesktopManagerInternal.GetCount(0, $iCount) : $oVirtualDesktopManagerInternal.GetCount($iCount)
 	If $iHresult <> 0 Then 
-			SetError($iHresult)
-			Return(-1)
+			Return SetError(@error, @extended, $iHresult)
 		Else 
 			Return($iCount)
 	EndIf
@@ -205,13 +204,12 @@ Func GetDesktopArray(ByRef $oArray)
 	$iRes = ($OSBuild >= $windows11) ? $oVirtualDesktopManagerInternal.GetDesktops(0, $pArray) : $oVirtualDesktopManagerInternal.GetDesktops($pArray)
 	ConsoleWrite("pArray=" & $pArray & @CRLF)
 	If @error or not $pArray or $iRes Then 
-		if @error Then 
-			SetError(@error, @extended)
-		Else
-			SetError(-1)
-		EndIf
 		ConsoleWriteError("GetDesktops failed. Error Code " & @error & ", Extended: " & @extended & ", pArray: " & $pArray & @CRLF)
-		Return -1
+		if @error Then 
+			Return SetError(@error, @extended)
+		Else
+			Return SetError(-1)
+		EndIf
 	EndIf
 	$oArray = ObjCreateInterface($pArray, $IID_IObjectArray, $tagIObjectArray)
 	If @error Then  
