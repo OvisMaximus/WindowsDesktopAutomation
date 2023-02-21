@@ -292,6 +292,7 @@ EndFunc
 Func MoveWindow($sQueryText, $sContentText, $iDesktop, $iXpos, $iYpos, $iWidth, $iHeight)
 	Local $hWnd, $iHresult
 	$hWnd = WinGetHandle($sQueryText, $sContentText)
+	If Not $hWnd Then Return -1
 	$iHresult = MoveWindowToDesktop($hWnd, $iDesktop)
 	If @error Then Return SetError(@error, @extended, -1)
 	$iHresult = WinMove($hWnd, "", $iXpos, $iYpos, $iWidth, $iHeight)
