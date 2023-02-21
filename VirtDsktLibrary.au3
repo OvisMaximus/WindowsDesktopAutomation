@@ -201,11 +201,17 @@ EndFunc
 
 ; enumerates all desktops
 Func GetDesktopArray(ByRef $oArray)
-	Local $pArray
-	($OSBuild >= $windows11) ? $oVirtualDesktopManagerInternal.GetDesktops(0, $pArray) : $oVirtualDesktopManagerInternal.GetDesktops($pArray)
-	If @error Then 
-		ConsoleWriteError("GetDesktops failed. Error Code " & @error & ", Extended: " & @extended & @CRLF)
-		Return SetError(@error, @extended, -1)
+	Local $pArray, $iRes
+	$iRes = ($OSBuild >= $windows11) ? $oVirtualDesktopManagerInternal.GetDesktops(0, $pArray) : $oVirtualDesktopManagerInternal.GetDesktops($pArray)
+	ConsoleWrite("pArray=" & $pArray & @CRLF)
+	If @error or not $pArray or $iRes Then 
+		if @error Then 
+			SetError(@error, @extended)
+		Else
+			SetError(-1)
+		EndIf
+		ConsoleWriteError("GetDesktops failed. Error Code " & @error & ", Extended: " & @extended & ", pArray: " & $pArray & @CRLF)
+		Return -1
 	EndIf
 	$oArray = ObjCreateInterface($pArray, $IID_IObjectArray, $tagIObjectArray)
 	If @error Then  
