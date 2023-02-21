@@ -1,13 +1,8 @@
 #include <Constants.au3>
-
-;https://github.com/MScholtes/VirtualDesktop/blob/master/VirtualDesktop11Insider.cs
-;https://github.com/MScholtes/VirtualDesktop/blob/master/VirtualDesktop11.cs
-;https://github.com/MScholtes/VirtualDesktop/blob/master/VirtualDesktop.cs
-
 Opt("MustDeclareVars", True)
 
 ; Windows 11 currently registers as Windows 10 in the registry. This script is compatible with both OS. This could break for Windows 11 in the future if Microsoft updates the registry for Windows 11 to reflect it's OS
-If @OSVersion <> "WIN_10" And  @OSVersion <> "WIN_11" Then Exit MsgBox($MB_SYSTEMMODAL, "", "This script only runs on Win 10 and Win 11" & @OSVersion)
+If @OSVersion <> "WIN_10" And  @OSVersion <> "WIN_11" Then Exit MsgBox($MB_SYSTEMMODAL, "", "This script only runs on Win 10 and Win 11 but your system announces itself as " & @OSVersion)
 
 Local $OSBuild = RegRead("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", "CurrentBuild")
 Local Enum $windows10 = 21999, $windows11 = 22000
@@ -78,8 +73,6 @@ Local $CLSID_VirtualDesktopManagerInternal = "{C5E0CDCA-7B6E-41B2-9FC4-D93975CC4
 Local $tCLSID_VirtualDesktopManagerInternal = __uuidof($CLSID_VirtualDesktopManagerInternal)
 Local $tIID_IVirtualDesktopManagerInternal = __uuidof($IID_IVirtualDesktopManagerInternal)
 
-
-
 ; ApplicationViewCollection object
 Local $CLSID_IApplicationViewCollection = "{1841C6D7-4F9D-42C0-AF41-8747538F10E5}"
 Local $tCLSID_IApplicationViewCollection = __uuidof($CLSID_IApplicationViewCollection)
@@ -141,7 +134,21 @@ Local $tagIVirtualDesktop = _
     "IsViewVisible hresult(ptr;bool*);" & _
     "GetId hresult(clsid*);"
 
+; ActiveDesktop object
+Global Const $AD_GETWP_IMAGE = 1
+Global Const $AD_APPLY_ALL = 7
+Global $CLSID_ActiveDesktop = "{75048700-ef1f-11d0-9888-006097deacf9}"
+Global $IID_IActiveDesktop = "{f490eb00-1240-11d1-9888-006097deacf9}"
 
+; implemented only first 3 methods
+Global $tagIActiveDesktop = _
+  "ApplyChanges hresult(dword);" & _
+  "GetWallpaper hresult(struct*;uint;dword);" & _
+  "SetWallpaper hresult(wstr;dword)"
+
+; create object
+Local $oActiveDesktop = ObjCreateInterface($CLSID_ActiveDesktop, $IID_IActiveDesktop, $tagIActiveDesktop)
+If Not IsObj($oActiveDesktop) Then Exit MsgBox( 0, "Script Error", "Object of Active Desktop control is invalid.", 90)
 
 ; objects creation
 Local $pService
@@ -162,10 +169,7 @@ If @error Then Exit MsgBox("No Access to Virtual Desktop Manager Internal. Error
 Local $oVirtualDesktopManagerInternal = ObjCreateInterface($pVirtualDesktopManagerInternal, $IID_IVirtualDesktopManagerInternal, $tagIVirtualDesktopManagerInternal)
 If @error Then Exit MsgBox("Cast of Virtual Desktop Manager Internal to Object failed. Error: " & @error & ", extended: " & @extended & @CRLF)
 
-;~ $oService.QueryService($tCLSID_VirtualDesktopPinnedApps, $tIID_IVirtualDesktopPinnedApps, $pVirtualDesktopPinnedApps)
-;~ ConsoleWrite("Virtual Desktop Pinned Apps = " & $pVirtualDesktopPinnedApps & @CRLF)
-;~ Local $oVirtualDesktopPinnedApps = ObjCreateInterface($pVirtualDesktopPinnedApps, $IID_IVirtualDesktopPinnedApps, $tagIVirtualDesktopPinnedApps)
-;~ ConsoleWrite("Virtual Desktop Pinned Apps = " & IsObj($oVirtualDesktopPinnedApps) & @CRLF)
+
 
 ; gives the number of virtual desktops
 Func getNumDesktops() 
@@ -296,9 +300,29 @@ EndFunc
 ;~ $iHresult = $oVirtualDesktopManagerInternal.RemoveDesktop($pNew, $pDesktop)
 ;~ ConsoleWrite("Delete = " & $iHresult & @CRLF)
 
+;~ $oService.QueryService($tCLSID_VirtualDesktopPinnedApps, $tIID_IVirtualDesktopPinnedApps, $pVirtualDesktopPinnedApps)
+;~ ConsoleWrite("Virtual Desktop Pinned Apps = " & $pVirtualDesktopPinnedApps & @CRLF)
+;~ Local $oVirtualDesktopPinnedApps = ObjCreateInterface($pVirtualDesktopPinnedApps, $IID_IVirtualDesktopPinnedApps, $tagIVirtualDesktopPinnedApps)
+;~ ConsoleWrite("Virtual Desktop Pinned Apps = " & IsObj($oVirtualDesktopPinnedApps) & @CRLF)
+
+;~ ; get current wallpaper
+;~ Local $iHresult, $iLength = 100
+;~ Local $tName = DllStructCreate("wchar string[" & $iLength & "]")
+;~ $iHresult = $oActiveDesktop.GetWallpaper(DllStructGetPtr($tName), $iLength, $AD_GETWP_IMAGE)
+;~ ConsoleWrite($tName.string & "/" & $iHresult & @CRLF)
+
+;~ ; set new wallpaper
+;~ $iHresult = $oActiveDesktop.SetWallpaper("C:\Windows\Web\Wallpaper\acer01.jpg", 0)  ; <<<<<<<<<<< set correct path to WP file
+;~ ConsoleWrite("Set Wallpaper returned " & $iHresult & @CRLF)
+;~ $iHresult = $oActiveDesktop.ApplyChanges($AD_APPLY_ALL)
+;~ ConsoleWrite("Apply Changes returned " & $iHresult & @CRLF)
+
 Func __uuidof($sGUID)
     Local $tGUID = DllStructCreate("ulong Data1;ushort Data2;ushort Data3;byte Data4[8]")
     DllCall("ole32.dll", "long", "CLSIDFromString", "wstr", $sGUID, "struct*", $tGUID)
     If @error Then Return SetError(@error, @extended, 0)
     Return $tGUID
 EndFunc   ;==>__uuidof
+
+
+
