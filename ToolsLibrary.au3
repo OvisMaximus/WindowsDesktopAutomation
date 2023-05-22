@@ -1,4 +1,5 @@
 Global $userDir = EnvGet("USERPROFILE")
+Global $sharedUserDir = EnvGet("PUBLIC")
 
 Func getUserPath($userFileName)
 	Return $userDir & "\" & $userFileName
@@ -8,19 +9,28 @@ Func getUserCloudPath($userFileName)
 	Return $userDir & "\OneDrive\" & $userFileName
 EndFunc
 	
+Func getSharedUserPath($userFileName)	
+	Return $sharedUserDir & "\" & $userFileName
+EndFunc
+
 Func deleteUserFile($filename)
 	If Not FileDelete (getUserPath($filename)) Then
-		FileDelete(getUserCloudPath($filename))
-	EndIf		
+		If Not FileDelete(getUserCloudPath($filename)) Then
+			FileDelete(getSharedUserPath($filename))
+		EndIf		
+	EndIf
 EndFunc
 
 Func getUserFilePath($userFileName) 
 	Local $userFilePath = getUserPath($userFileName)
 	Local $userCloudPath = getUserCloudPath($userFileName)
+	Local $sharedUserPath = getSharedUserPath($userFileName)
 	if FileExists($userFilePath) Then
 		Return $userFilePath
 	ElseIf FileExists($userCloudPath) Then
 		Return $userCloudPath
+	ElseIf FileExists($sharedUserPath) Then
+		Return $sharedUserPath
 	Else
 		Return -1
 	EndIf

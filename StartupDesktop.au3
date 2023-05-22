@@ -19,6 +19,8 @@ launchProgram("C:\Program Files\DesktopOK\DesktopOK_x64.exe /load C:\Users\loren
 	
 deleteUserFile("Desktop\Checking your credentials.lnk")
 deleteUserFile("Desktop\https   outlook.office365.com.lnk")
+deleteUserFile("Desktop\Microsoft Teams.lnk")
+deleteUserFile("Desktop\Adobe Acrobat.lnk")
 
 MoveWindow("DPDHL Daily", "", 2, 0, 0, 1920, 1056)
 MoveWindow("Posteingang",  "", 2, 3834, 0, 1549, 846) 
